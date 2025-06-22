@@ -35,9 +35,9 @@ function zodiac_slot_machine_enqueue_assets() {
     if ( is_singular() && has_shortcode( get_post()->post_content, 'zodiac_slot_machine' ) ) {
         $plugin_version = '1.0.0';
 
-        // These paths point to the compiled files we will create later.
-        $react_app_js = plugin_dir_url( __FILE__ ) . 'build/static/js/main.js';
-        $react_app_css = plugin_dir_url( __FILE__ ) . 'build/static/css/main.css';
+        // Correct paths to the compiled files in the build directory.
+        $react_app_js = plugin_dir_url( __FILE__ ) . 'build/main.js';
+        $react_app_css = plugin_dir_url( __FILE__ ) . 'build/main.css';
 
         wp_enqueue_script(
             'zodiac-slot-machine-react-app',
