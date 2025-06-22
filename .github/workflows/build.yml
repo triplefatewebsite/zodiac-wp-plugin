@@ -26,17 +26,14 @@ jobs:
 
     - name: Package plugin for distribution
       run: |
-        # Create a directory for the final plugin files
         mkdir plugin_root
-        # Copy the built assets and the main PHP file into it
         cp -r build/ plugin_root/
-        cp zodiac-wp-plugin.php plugin_root/
-        # Navigate into the directory and zip its contents
+        cp zodiac-slot-machine.php plugin_root/
         cd plugin_root
-        zip -r ../zodiac-wp-plugin.zip .
+        zip -r ../zodiac-slot-machine.zip .
 
     - name: Upload artifact
       uses: actions/upload-artifact@v4
       with:
-        name: zodiac-wp-plugin
-        path: zodiac-wp-plugin.zip
+        name: zodiac-slot-machine-plugin
+        path: zodiac-slot-machine.zip
