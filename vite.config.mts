@@ -9,20 +9,22 @@ const __dirname = path.dirname(__filename);
 
 export default defineConfig({
   plugins: [react()],
+  // Stop Vite from trying to clear the console
+  clearScreen: false,
   build: {
     outDir: path.resolve(__dirname, 'build'),
     lib: {
       entry: path.resolve(__dirname, 'src/main.tsx'),
-      name: 'ZodiacWPPlugin',
-      // The filename of the bundled output.
-      // This will produce main.js
+      // The name of the global variable for the IIFE bundle
+      name: 'ZodiacSlotMachine',
+      // The filename of the bundled output
       fileName: 'main',
-      // We only need the ES module format for modern browsers/bundlers.
-      formats: ['es'],
+      // Build a self-executing IIFE format for direct browser use
+      formats: ['iife'],
     },
     rollupOptions: {
       output: {
-        // This ensures our CSS file is named main.css
+        // Ensure the CSS file is named main.css
         assetFileNames: 'main.css',
       },
     },
