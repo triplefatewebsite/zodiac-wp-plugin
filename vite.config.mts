@@ -26,6 +26,8 @@ export default defineConfig({
       output: {
         // Ensure the CSS file is named main.css
         assetFileNames: 'main.css',
+        // Force the JS output file to be named main.js
+        entryFileNames: 'main.js',
       },
     },
   },
