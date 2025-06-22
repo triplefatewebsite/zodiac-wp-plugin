@@ -1,0 +1,38 @@
+name: Build WordPress Plugin
+
+on:
+  push:
+    branches: [ master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+
+    - name: Install dependencies
+      run: npm install
+
+    - name: Build project
+      run: npm run build
+
+    - name: Package plugin for distribution
+      run: |
+        mkdir zodiac-wp-plugin
+        cp -r build zodiac-wp-plugin/
+        cp zodiac-wp-plugin.php zodiac-wp-plugin/
+        zip -r zodiac-wp-plugin.zip zodiac-wp-plugin
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: zodiac-wp-plugin
+        path: zodiac-wp-plugin.zip
