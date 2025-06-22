@@ -2,7 +2,7 @@ import React, { FC, ReactElement, useCallback, useEffect, useRef, useState } fro
 
 import { SlotItem, ResultsType } from '../types/zodiac';
 import * as zodiacData from '../data/zodiac';
-import { calculateWesternZodiac, calculateChineseZodiac, calculateNumerology, getWesternImagePath } from '../utils/zodiac';
+import { calculateWesternZodiac, calculateChineseZodiac, calculateNumerology, getWesternImagePath, getChineseImagePath, getNumerologyImagePath } from '../utils/zodiac';
 
 export interface SlotMachineProps {
   birthdate: Date;
@@ -169,14 +169,20 @@ export const SlotMachine: FC<SlotMachineProps> = ({
     audioRef.current.loop = true;
 
     // Preload all images
-    const allSlotImages = [
-      ...zodiacData.westernZodiac,
-      ...zodiacData.chineseZodiac,
-      ...zodiacData.numerology
-    ];
-    allSlotImages.forEach(item => {
-      const img = new window.Image(); // Use window.Image for preloading
-      img.src = item.imagePath;
+    zodiacData.westernZodiac.forEach(item => {
+      // Preload both male and default images for Western zodiac
+      const imgDefault = new window.Image();
+      imgDefault.src = getWesternImagePath(item.id, null);
+      const imgMale = new window.Image();
+      imgMale.src = getWesternImagePath(item.id, 'male');
+    });
+    zodiacData.chineseZodiac.forEach(item => {
+      const img = new window.Image();
+      img.src = getChineseImagePath(item.id);
+    });
+    zodiacData.numerology.forEach(item => {
+      const img = new window.Image();
+      img.src = getNumerologyImagePath(item.id);
     });
 
     // Cleanup on unmount
