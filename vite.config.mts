@@ -11,6 +11,10 @@ export default defineConfig({
   plugins: [react()],
   // Stop Vite from trying to clear the console
   clearScreen: false,
+  // Shim process.env for browser compatibility
+  define: {
+    'process.env': {},
+  },
   build: {
     outDir: path.resolve(__dirname, 'build'),
     lib: {
