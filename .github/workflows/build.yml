@@ -26,10 +26,14 @@ jobs:
 
     - name: Package plugin for distribution
       run: |
-        mkdir zodiac-wp-plugin
-        cp -r build zodiac-wp-plugin/
-        cp zodiac-wp-plugin.php zodiac-wp-plugin/
-        zip -r zodiac-wp-plugin.zip zodiac-wp-plugin
+        # Create a directory for the final plugin files
+        mkdir plugin_root
+        # Copy the built assets and the main PHP file into it
+        cp -r build/ plugin_root/
+        cp zodiac-wp-plugin.php plugin_root/
+        # Navigate into the directory and zip its contents
+        cd plugin_root
+        zip -r ../zodiac-wp-plugin.zip .
 
     - name: Upload artifact
       uses: actions/upload-artifact@v4
