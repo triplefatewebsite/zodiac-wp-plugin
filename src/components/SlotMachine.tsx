@@ -1,302 +1,166 @@
-import { FC, ReactElement, useState, useEffect, useRef, useCallback } from 'react';
-
+import { FC, useState, useEffect, useRef, useCallback } from 'react';
 import { SlotItem, ResultsType } from '../types/zodiac';
 import * as zodiacData from '../data/zodiac';
-import { calculateWesternZodiac, calculateChineseZodiac, calculateNumerology, getWesternImagePath, getChineseImagePath, getNumerologyImagePath } from '../utils/zodiac';
-
-
+import { calculateWesternZodiac, calculateChineseZodiac, calculateNumerology, getWesternImagePath } from '../utils/zodiac';
 
 export interface SlotMachineProps {
-  birthdate: Date;
-  gender: string; // Added gender prop
-  onSpinComplete?: () => void;
-  onResults?: (results: ResultsType) => void;
-  isSpinning?: boolean;
+  onSpinComplete: (results: ResultsType, gender: string) => void;
+  showResultsButton: boolean;
+  onShowResults: () => void;
 }
 
-export const SlotMachine: FC<SlotMachineProps> = ({
-  birthdate,
-  gender, // Added gender prop
-  onSpinComplete,
-  onResults,
-  isSpinning: externalSpinning
-}: SlotMachineProps): ReactElement => {
-  // State variables
-  const [internalSpinning, setInternalSpinning] = useState<boolean>(false);
+export const SlotMachine: FC<SlotMachineProps> = ({ onSpinComplete, showResultsButton, onShowResults }) => {
+  const [birthdate, setBirthdate] = useState(new Date());
+  const [gender, setGender] = useState('male');
+  const [isSpinning, setIsSpinning] = useState<boolean>(false);
   const [selectedItems, setSelectedItems] = useState<(SlotItem | null)[]>([null, null, null]);
-  const [currentSpinItems, setCurrentSpinItems] = useState<SlotItem[]>([
-    { ...zodiacData.westernZodiac[0], imagePath: getWesternImagePath(zodiacData.westernZodiac[0].id, gender) },
-    zodiacData.chineseZodiac[0],
-    zodiacData.numerology[0]
-  ]);
-  
-  // Refs
+  const [currentSpinItems, setCurrentSpinItems] = useState<SlotItem[]>([{
+    ...zodiacData.westernZodiac[0],
+    imagePath: getWesternImagePath(zodiacData.westernZodiac[0].id, 'male')
+  }, zodiacData.chineseZodiac[0], zodiacData.numerology[0]]);
+
   const spinInterval = useRef<number | undefined>(undefined);
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const isFinishingAnimationRef = useRef(false); // Initialize directly
 
-  // Derived state - handle spinning state safely
-  const spinning: boolean = externalSpinning ?? internalSpinning;
-
-  useEffect(() => {
-    console.log('[SlotMachine State] Spinning:', spinning, 'SelectedItems:', JSON.stringify(selectedItems));
-  }, [spinning, selectedItems]);
-
-  // Update random items during spin
-  const updateRandomItems = useCallback((): void => {
+  const updateRandomItems = useCallback(() => {
     let randomWestern = zodiacData.westernZodiac[Math.floor(Math.random() * zodiacData.westernZodiac.length)];
-    // Ensure gender-specific image path for random item
-    if (randomWestern) {
-      randomWestern = { ...randomWestern, imagePath: getWesternImagePath(randomWestern.id, gender) };
-    }
+    randomWestern = { ...randomWestern, imagePath: getWesternImagePath(randomWestern.id, gender) };
     const randomChinese = zodiacData.chineseZodiac[Math.floor(Math.random() * zodiacData.chineseZodiac.length)];
     const randomNumerology = zodiacData.numerology[Math.floor(Math.random() * zodiacData.numerology.length)];
-    
-    if (randomWestern && randomChinese && randomNumerology) {
-      const items = [randomWestern, randomChinese, randomNumerology];
-      setCurrentSpinItems(items);
-    }
-  }, [gender]); // Added gender to dependency array
+    setCurrentSpinItems([randomWestern, randomChinese, randomNumerology]);
+  }, [gender]);
 
-  // Initialize or reset state when spinning starts
   useEffect(() => {
-    if (!spinning || !birthdate) return;
+    if (!isSpinning) return;
 
-    // Reset state
     setSelectedItems([null, null, null]);
 
-    // Calculate final results
     const westernSign = calculateWesternZodiac(birthdate.getMonth() + 1, birthdate.getDate());
     const chineseSign = calculateChineseZodiac(birthdate.getFullYear());
     const numerologyNumber = calculateNumerology(birthdate);
 
     let westernItem = zodiacData.westernZodiac.find(item => item.id === westernSign);
-    // Ensure gender-specific image path for final result item
     if (westernItem) {
       westernItem = { ...westernItem, imagePath: getWesternImagePath(westernItem.id, gender) };
     }
     const chineseItem = zodiacData.chineseZodiac.find(item => item.id === chineseSign);
     const numerologyItem = zodiacData.numerology.find(item => item.id === numerologyNumber);
 
-    if (!westernItem || !chineseItem || !numerologyItem) return;
-
-    const finalResults = {
-      western: westernItem,
-      chinese: chineseItem,
-      numerology: numerologyItem
+    if (!westernItem || !chineseItem || !numerologyItem) {
+        setIsSpinning(false);
+        return;
     };
 
-    // Start spin animation
-    let frame = 0;
-    const maxFrames = 24; // 6 seconds * 4 frames per second
-    const frameInterval = 250; // 250ms between frames
+    const finalResults: ResultsType = { western: westernItem, chinese: chineseItem, numerology: numerologyItem };
 
-    let spinTimerId: number | undefined = undefined;
+    let frame = 0;
+    const maxFrames = 24;
+    const frameInterval = 250;
 
     const runSpinAnimation = () => {
-      spinTimerId = window.setInterval(() => {
-        if (frame >= maxFrames) {
-          if (spinTimerId) clearInterval(spinTimerId);
-          
-          isFinishingAnimationRef.current = true; 
+      if (frame >= maxFrames) {
+        if (spinInterval.current) {
+          clearInterval(spinInterval.current);
+          spinInterval.current = undefined;
           setSelectedItems([finalResults.western, finalResults.chinese, finalResults.numerology]);
-          if (onResults) onResults(finalResults);
-          if (onSpinComplete) onSpinComplete(); 
-
+          onSpinComplete(finalResults, gender);
           if (audioRef.current) {
             audioRef.current.pause();
             audioRef.current.currentTime = 0;
           }
-          // isFinishingAnimationRef.current will be reset when a new spin starts or on unmount
-        } else {
-          updateRandomItems();
-          frame++;
+          // No longer setting isSpinning to false here, will be controlled by parent
         }
-      }, frameInterval);
+        return;
+      }
+      updateRandomItems();
+      frame++;
     };
 
-    // Start audio and spin
+    spinInterval.current = window.setInterval(runSpinAnimation, frameInterval);
     if (audioRef.current) {
-      audioRef.current.play().catch(e => console.error("Audio play error:", e));
+      audioRef.current.play().catch(e => console.error("Audio play failed", e));
     }
-    runSpinAnimation();
 
-    // Cleanup function
     return () => {
-      if (spinTimerId) clearInterval(spinTimerId);
-      // Only reset items if the spin was interrupted (i.e., didn't complete normally)
-      if (!isFinishingAnimationRef.current) {
-        setSelectedItems([null, null, null]);
-      }
-      // Ensure audio stops if unmounted during spin
-      if (audioRef.current && !audioRef.current.paused) {
-        audioRef.current.pause();
-        audioRef.current.currentTime = 0;
-      }
-    };
-  }, [spinning, birthdate, onSpinComplete, updateRandomItems, onResults]);
-
-  // Handle audio playback
-  useEffect(() => {
-    if (spinning && audioRef.current) {
-      console.log('Starting audio');
-      // Ensure audio is initialized before playing
-      if (!audioRef.current.src) {
-        audioRef.current.src = 'sounds/spin.mp3';
-        audioRef.current.loop = true;
-      }
-      audioRef.current.currentTime = 0;
-      audioRef.current.play().catch(err => console.error('Audio play error:', err));
-    } else if (!spinning && audioRef.current && audioRef.current.src) { // Check src to ensure it was initialized
-      console.log('Stopping audio');
-      audioRef.current.pause();
-    }
-  }, [spinning]);
-
-  // Effect to handle external spinning prop changes
-  useEffect(() => {
-    if (externalSpinning === true) {
-      // Reset states when a new spin is initiated externally
-      setSelectedItems([null, null, null]);
-      isFinishingAnimationRef.current = false;
-    } else if (externalSpinning === false) {
-      setInternalSpinning(false); // Ensure internal state aligns if explicitly stopped
-    }
-  }, [externalSpinning]);
-
-  // Effect for component mount (audio init, image preloading) and unmount (cleanup)
-  useEffect(() => {
-    // Initialize audio
-    audioRef.current = new Audio(`${(window as any).zodiacPluginData.pluginUrl}build/sounds/spin.mp3`);
-    audioRef.current.loop = true;
-
-    // Preload all images
-    zodiacData.westernZodiac.forEach(item => {
-      // Preload both male and default images for Western zodiac
-      const imgDefault = new window.Image();
-      imgDefault.src = getWesternImagePath(item.id, null);
-      const imgMale = new window.Image();
-      imgMale.src = getWesternImagePath(item.id, 'male');
-    });
-    zodiacData.chineseZodiac.forEach(item => {
-      const img = new window.Image();
-      img.src = getChineseImagePath(item.id);
-    });
-    zodiacData.numerology.forEach(item => {
-      const img = new window.Image();
-      img.src = getNumerologyImagePath(item.id);
-    });
-
-    // Cleanup on unmount
-    return () => {
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current.currentTime = 0;
-        // audioRef.current = null; // Consider if re-init is needed or if this is safer
-      }
       if (spinInterval.current) {
-         clearInterval(spinInterval.current);
-         spinInterval.current = undefined;
+        clearInterval(spinInterval.current);
       }
     };
-  }, []); // Empty dependency array means this runs once on mount and cleans up on unmount
+  }, [isSpinning, birthdate, gender, onSpinComplete, updateRandomItems]);
+
+  const handleSpinClick = () => {
+    if (isSpinning) return;
+    setIsSpinning(true);
+  };
+
+  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setBirthdate(new Date(e.target.value));
+  };
+
+  const handleGenderChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setGender(e.target.value);
+  };
+
+  useEffect(() => {
+    const audio = new Audio(`${(window as any).zodiacPluginData.pluginUrl}build/audio/slot-machine.mp3`);
+    audio.preload = 'auto';
+    audioRef.current = audio;
+  }, []);
 
   return (
     <div className="flex flex-col items-center space-y-4 p-4 rounded-lg shadow-xl">
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 w-full max-w-4xl">
-        {/* Slot 1: Western Zodiac */}
-        <div className="slot-item mx-auto flex flex-col items-center justify-center p-2 bg-gray-700 rounded-md shadow w-48 h-48 md:w-56 md:h-56 lg:w-[250px] lg:h-[250px]">
-          {spinning && !selectedItems[0] && currentSpinItems[0] ? (
-            // Spinning state for Western Zodiac
-            <>
-              <div className="image-container w-full h-full relative">
-                <img
-                  src={currentSpinItems[0].imagePath}
-                  alt={currentSpinItems[0].name}
-                  className="absolute inset-0 w-full h-full object-contain"
-                />
-              </div>
-            </>
-          ) : selectedItems[0] ? (
-            // Result state for Western Zodiac
-            <>
-              <div className="image-container w-full h-full relative">
-                <img
-                  src={selectedItems[0].imagePath}
-                  alt={selectedItems[0].name}
-                  className="absolute inset-0 w-full h-full object-contain"
-                />
-              </div>
-            </>
-          ) : (
-            // Placeholder/Initial state for Western Zodiac
-            <div className="w-full h-full bg-gray-600 rounded animate-pulse"></div>
-          )}
-        </div>
-
-        {/* Slot 2: Chinese Zodiac */}
-        <div className="slot-item mx-auto flex flex-col items-center justify-center p-2 bg-gray-700 rounded-md shadow w-48 h-48 md:w-56 md:h-56 lg:w-[250px] lg:h-[250px]">
-          {spinning && !selectedItems[1] && currentSpinItems[1] ? (
-            // Spinning state for Chinese Zodiac
-            <>
-              <div className="image-container w-full h-full relative">
-                <img
-                  src={currentSpinItems[1].imagePath}
-                  alt={currentSpinItems[1].name}
-                  className="absolute inset-0 w-full h-full object-contain"
-                />
-              </div>
-            </>
-          ) : selectedItems[1] ? (
-            // Result state for Chinese Zodiac
-            <>
-              <div className="image-container w-full h-full relative">
-                <img
-                  src={selectedItems[1].imagePath}
-                  alt={selectedItems[1].name}
-                  className="absolute inset-0 w-full h-full object-contain"
-                />
-              </div>
-            </>
-          ) : (
-            // Placeholder/Initial state for Chinese Zodiac
-            <div className="w-full h-full bg-gray-600 rounded animate-pulse"></div>
-          )}
-        </div>
-
-        {/* Slot 3: Numerology */}
-        <div className="slot-item mx-auto flex flex-col items-center justify-center p-2 bg-gray-700 rounded-md shadow w-48 h-48 md:w-56 md:h-56 lg:w-[250px] lg:h-[250px]">
-          {spinning && !selectedItems[2] && currentSpinItems[2] ? (
-            // Spinning state for Numerology
-            <>
-              <div className="image-container w-full h-full relative">
-                <img
-                  src={currentSpinItems[2].imagePath}
-                  alt={currentSpinItems[2].name}
-                  className="absolute inset-0 w-full h-full object-contain"
-                />
-              </div>
-            </>
-          ) : selectedItems[2] ? (
-            // Result state for Numerology
-            <>
-              <div className="image-container w-full h-full relative">
-                <img
-                  src={selectedItems[2].imagePath}
-                  alt={selectedItems[2].name}
-                  className="absolute inset-0 w-full h-full object-contain"
-                />
-              </div>
-            </>
-          ) : (
-            // Placeholder/Initial state for Numerology
-            <div className="w-full h-full bg-gray-600 rounded animate-pulse"></div>
-          )}
-        </div>
+      <div className="flex flex-col md:flex-row gap-4 mb-4">
+        <input type="date" onChange={handleDateChange} value={birthdate.toISOString().split('T')[0]} className="p-2 rounded bg-gray-700 text-white" />
+        <select onChange={handleGenderChange} value={gender} className="p-2 rounded bg-gray-700 text-white">
+          <option value="male">Male</option>
+          <option value="female">Female</option>
+        </select>
       </div>
-      {/* Audio element is managed in useEffect */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 w-full max-w-4xl">
+        {/* Slot Display Logic */}
+        {[0, 1, 2].map(index => (
+          <div key={index} className="slot-item mx-auto flex flex-col items-center justify-center p-2 bg-gray-700 rounded-md shadow w-48 h-48 md:w-56 md:h-56 lg:w-[250px] lg:h-[250px]">
+            {(isSpinning && currentSpinItems[index]) ? (
+              <div className="image-container w-full h-full relative">
+                <img
+                  src={currentSpinItems[index].imagePath}
+                  alt={currentSpinItems[index].name}
+                  className="absolute inset-0 w-full h-full object-contain"
+                />
+              </div>
+            ) : selectedItems[index] ? (
+              <div className="image-container w-full h-full relative">
+                <img
+                  src={selectedItems[index]!.imagePath}
+                  alt={selectedItems[index]!.name}
+                  className="absolute inset-0 w-full h-full object-contain"
+                />
+              </div>
+            ) : (
+              <div className="w-full h-full bg-gray-600 rounded animate-pulse"></div>
+            )}
+          </div>
+        ))}
+      </div>
+
+      {!isSpinning && !showResultsButton && (
+        <button
+          onClick={handleSpinClick}
+          className="mt-6 px-8 py-4 bg-blue-500 text-white font-bold rounded-lg shadow-lg hover:bg-blue-600 transition-colors duration-300"
+        >
+          Spin
+        </button>
+      )}
+      {showResultsButton && (
+        <button
+          onClick={onShowResults}
+          className="mt-6 px-8 py-4 bg-green-500 text-white font-bold rounded-lg shadow-lg hover:bg-green-600 transition-colors duration-300"
+        >
+          View Results
+        </button>
+      )}
     </div>
-  )
+  );
 };
 
-export default SlotMachine;
+
