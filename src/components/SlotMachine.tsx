@@ -1,4 +1,4 @@
-import React, { FC, ReactElement, useCallback, useEffect, useRef, useState } from 'react';
+import { FC, ReactElement, useState, useEffect, useRef, useCallback } from 'react';
 
 import { SlotItem, ResultsType } from '../types/zodiac';
 import * as zodiacData from '../data/zodiac';
@@ -202,119 +202,95 @@ export const SlotMachine: FC<SlotMachineProps> = ({
   }, []); // Empty dependency array means this runs once on mount and cleans up on unmount
 
   return (
-    <div className="flex flex-col items-center space-y-4 p-4 bg-gray-800 rounded-lg shadow-xl">
+    <div className="flex flex-col items-center space-y-4 p-4 rounded-lg shadow-xl">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 w-full max-w-4xl">
         {/* Slot 1: Western Zodiac */}
-        <div className="slot-item w-fit mx-auto flex flex-col items-center justify-center p-1 bg-gray-700 rounded-md shadow">
+        <div className="slot-item mx-auto flex flex-col items-center justify-center p-2 bg-gray-700 rounded-md shadow w-48 h-48 md:w-56 md:h-56 lg:w-[250px] lg:h-[250px]">
           {spinning && !selectedItems[0] && currentSpinItems[0] ? (
             // Spinning state for Western Zodiac
             <>
-              <div className="image-container w-48 h-48 md:w-56 md:h-56 lg:w-[250px] lg:h-[250px] relative">
+              <div className="image-container w-full h-full relative">
                 <img
                   src={currentSpinItems[0].imagePath}
                   alt={currentSpinItems[0].name}
                   className="absolute inset-0 w-full h-full object-contain"
-                  onError={(e: React.SyntheticEvent<HTMLImageElement, Event>) => {
-                    const target = e.target as HTMLImageElement;
-                    target.style.border = '2px solid red';
-                  }}
                 />
               </div>
             </>
           ) : selectedItems[0] ? (
             // Result state for Western Zodiac
             <>
-              <div className="image-container w-48 h-48 md:w-56 md:h-56 lg:w-[250px] lg:h-[250px] relative">
+              <div className="image-container w-full h-full relative">
                 <img
                   src={selectedItems[0].imagePath}
                   alt={selectedItems[0].name}
                   className="absolute inset-0 w-full h-full object-contain"
-                  onError={(e: React.SyntheticEvent<HTMLImageElement, Event>) => {
-                    const target = e.target as HTMLImageElement;
-                    target.style.border = '2px solid red';
-                  }}
                 />
               </div>
             </>
           ) : (
             // Placeholder/Initial state for Western Zodiac
-            <div className="w-48 h-48 md:w-56 md:h-56 lg:w-[250px] lg:h-[250px] bg-gray-600 rounded animate-pulse"></div>
+            <div className="w-full h-full bg-gray-600 rounded animate-pulse"></div>
           )}
         </div>
 
         {/* Slot 2: Chinese Zodiac */}
-        <div className="slot-item w-fit mx-auto flex flex-col items-center justify-center p-1 bg-gray-700 rounded-md shadow">
+        <div className="slot-item mx-auto flex flex-col items-center justify-center p-2 bg-gray-700 rounded-md shadow w-48 h-48 md:w-56 md:h-56 lg:w-[250px] lg:h-[250px]">
           {spinning && !selectedItems[1] && currentSpinItems[1] ? (
             // Spinning state for Chinese Zodiac
             <>
-              <div className="image-container w-48 h-48 md:w-56 md:h-56 lg:w-[250px] lg:h-[250px] relative">
+              <div className="image-container w-full h-full relative">
                 <img
                   src={currentSpinItems[1].imagePath}
                   alt={currentSpinItems[1].name}
                   className="absolute inset-0 w-full h-full object-contain"
-                  onError={(e: React.SyntheticEvent<HTMLImageElement, Event>) => {
-                    const target = e.target as HTMLImageElement;
-                    target.style.border = '2px solid red';
-                  }}
                 />
               </div>
             </>
           ) : selectedItems[1] ? (
             // Result state for Chinese Zodiac
             <>
-              <div className="image-container w-48 h-48 md:w-56 md:h-56 lg:w-[250px] lg:h-[250px] relative">
+              <div className="image-container w-full h-full relative">
                 <img
                   src={selectedItems[1].imagePath}
                   alt={selectedItems[1].name}
                   className="absolute inset-0 w-full h-full object-contain"
-                  onError={(e: React.SyntheticEvent<HTMLImageElement, Event>) => {
-                    const target = e.target as HTMLImageElement;
-                    target.style.border = '2px solid red';
-                  }}
                 />
               </div>
             </>
           ) : (
             // Placeholder/Initial state for Chinese Zodiac
-            <div className="w-48 h-48 md:w-56 md:h-56 lg:w-[250px] lg:h-[250px] bg-gray-600 rounded animate-pulse"></div>
+            <div className="w-full h-full bg-gray-600 rounded animate-pulse"></div>
           )}
         </div>
 
         {/* Slot 3: Numerology */}
-        <div className="slot-item w-fit mx-auto flex flex-col items-center justify-center p-1 bg-gray-700 rounded-md shadow">
+        <div className="slot-item mx-auto flex flex-col items-center justify-center p-2 bg-gray-700 rounded-md shadow w-48 h-48 md:w-56 md:h-56 lg:w-[250px] lg:h-[250px]">
           {spinning && !selectedItems[2] && currentSpinItems[2] ? (
             // Spinning state for Numerology
             <>
-              <div className="image-container w-48 h-48 md:w-56 md:h-56 lg:w-[250px] lg:h-[250px] relative">
+              <div className="image-container w-full h-full relative">
                 <img
                   src={currentSpinItems[2].imagePath}
                   alt={currentSpinItems[2].name}
                   className="absolute inset-0 w-full h-full object-contain"
-                  onError={(e: React.SyntheticEvent<HTMLImageElement, Event>) => {
-                    const target = e.target as HTMLImageElement;
-                    target.style.border = '2px solid red';
-                  }}
                 />
               </div>
             </>
           ) : selectedItems[2] ? (
             // Result state for Numerology
             <>
-              <div className="image-container w-48 h-48 md:w-56 md:h-56 lg:w-[250px] lg:h-[250px] relative">
+              <div className="image-container w-full h-full relative">
                 <img
                   src={selectedItems[2].imagePath}
                   alt={selectedItems[2].name}
                   className="absolute inset-0 w-full h-full object-contain"
-                  onError={(e: React.SyntheticEvent<HTMLImageElement, Event>) => {
-                    const target = e.target as HTMLImageElement;
-                    target.style.border = '2px solid red';
-                  }}
                 />
               </div>
             </>
           ) : (
             // Placeholder/Initial state for Numerology
-            <div className="w-48 h-48 md:w-56 md:h-56 lg:w-[250px] lg:h-[250px] bg-gray-600 rounded animate-pulse"></div>
+            <div className="w-full h-full bg-gray-600 rounded animate-pulse"></div>
           )}
         </div>
       </div>
