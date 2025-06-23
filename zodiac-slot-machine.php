@@ -33,7 +33,7 @@ add_shortcode( 'zodiac_slot_machine', 'zodiac_slot_machine_shortcode_handler' );
 function zodiac_slot_machine_enqueue_assets() {
     // Only enqueue assets if the shortcode is present on the page.
     if ( is_singular() && has_shortcode( get_post()->post_content, 'zodiac_slot_machine' ) ) {
-        $plugin_version = '1.0.2';
+        $plugin_version = '1.0.3';
 
         // Pass data to the script, like the plugin's base URL for assets.
         $script_data = array(
