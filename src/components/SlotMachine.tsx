@@ -1,4 +1,6 @@
 import { FC, useState, useEffect, useRef, useCallback } from 'react';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
 import { SlotItem, ResultsType } from '../types/zodiac';
 import * as zodiacData from '../data/zodiac';
 import { calculateWesternZodiac, calculateChineseZodiac, calculateNumerology, getWesternImagePath } from '../utils/zodiac';
@@ -93,8 +95,10 @@ export const SlotMachine: FC<SlotMachineProps> = ({ onSpinComplete, showResultsB
     setIsSpinning(true);
   };
 
-  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setBirthdate(new Date(e.target.value));
+  const handleDateChange = (date: Date | null) => {
+    if (date) {
+      setBirthdate(date);
+    }
   };
 
   const handleGenderChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -110,7 +114,12 @@ export const SlotMachine: FC<SlotMachineProps> = ({ onSpinComplete, showResultsB
   return (
     <div className="flex flex-col items-center space-y-4 p-4 rounded-lg shadow-xl">
       <div className="flex flex-col md:flex-row gap-4 mb-4">
-        <input type="date" onChange={handleDateChange} value={birthdate.toISOString().split('T')[0]} className="p-2 rounded bg-gray-700 text-white" />
+        <DatePicker
+          selected={birthdate}
+          onChange={handleDateChange}
+          dateFormat="dd/MM/yyyy"
+          className="p-2 rounded bg-gray-700 text-white w-full"
+        />
         <select onChange={handleGenderChange} value={gender} className="p-2 rounded bg-gray-700 text-white">
           <option value="male">Male</option>
           <option value="female">Female</option>
