@@ -53,6 +53,8 @@ export const CompatibilityView: FC<CompatibilityViewProps> = ({ results, gender,
           <p className="text-lg font-semibold mb-2">Western Zodiac</p>
           <p className="text-2xl capitalize mb-4">{western.name}</p>
           <video
+            width="320"
+            height="180"
             controls
             controlsList="nodownload"
             className="w-full rounded-lg"
@@ -71,6 +73,8 @@ export const CompatibilityView: FC<CompatibilityViewProps> = ({ results, gender,
           <p className="text-lg font-semibold mb-2">Chinese Zodiac</p>
           <p className="text-2xl capitalize mb-4">{chinese.name}</p>
           <video
+            width="320"
+            height="180"
             controls
             controlsList="nodownload"
             className="w-full rounded-lg"
@@ -89,6 +93,8 @@ export const CompatibilityView: FC<CompatibilityViewProps> = ({ results, gender,
           <p className="text-lg font-semibold mb-2">Life Path Number</p>
           <p className="text-2xl mb-4">{numerology.name}</p>
           <video
+            width="320"
+            height="180"
             controls
             controlsList="nodownload"
             className="w-full rounded-lg"

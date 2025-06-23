@@ -68,7 +68,7 @@ export const SlotMachine: FC<SlotMachineProps> = ({ onSpinComplete, showResultsB
             audioRef.current.pause();
             audioRef.current.currentTime = 0;
           }
-          // No longer setting isSpinning to false here, will be controlled by parent
+          setIsSpinning(false);
         }
         return;
       }
@@ -120,15 +120,7 @@ export const SlotMachine: FC<SlotMachineProps> = ({ onSpinComplete, showResultsB
         {/* Slot Display Logic */}
         {[0, 1, 2].map(index => (
           <div key={index} className="slot-item mx-auto flex flex-col items-center justify-center p-2 bg-gray-700 rounded-md shadow w-48 h-48 md:w-56 md:h-56 lg:w-[250px] lg:h-[250px]">
-            {(isSpinning && currentSpinItems[index]) ? (
-              <div className="image-container w-full h-full relative">
-                <img
-                  src={currentSpinItems[index].imagePath}
-                  alt={currentSpinItems[index].name}
-                  className="absolute inset-0 w-full h-full object-contain"
-                />
-              </div>
-            ) : selectedItems[index] ? (
+            {selectedItems[index] ? (
               <div className="image-container w-full h-full relative">
                 <img
                   src={selectedItems[index]!.imagePath}
@@ -136,6 +128,22 @@ export const SlotMachine: FC<SlotMachineProps> = ({ onSpinComplete, showResultsB
                   className="absolute inset-0 w-full h-full object-contain"
                 />
               </div>
+            ) : isSpinning && currentSpinItems[index] ? (
+              <div className="image-container w-full h-full relative">
+                <img
+                  src={currentSpinItems[index].imagePath}
+                  alt={currentSpinItems[index].name}
+                  className="absolute inset-0 w-full h-full object-contain"
+                />
+              </div>
+            ) : currentSpinItems[index] ? (
+                <div className="image-container w-full h-full relative">
+                    <img
+                        src={currentSpinItems[index].imagePath}
+                        alt={currentSpinItems[index].name}
+                        className="absolute inset-0 w-full h-full object-contain"
+                    />
+                </div>
             ) : (
               <div className="w-full h-full bg-gray-600 rounded animate-pulse"></div>
             )}
