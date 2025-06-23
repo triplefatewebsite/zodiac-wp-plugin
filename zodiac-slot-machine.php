@@ -33,7 +33,13 @@ add_shortcode( 'zodiac_slot_machine', 'zodiac_slot_machine_shortcode_handler' );
 function zodiac_slot_machine_enqueue_assets() {
     // Only enqueue assets if the shortcode is present on the page.
     if ( is_singular() && has_shortcode( get_post()->post_content, 'zodiac_slot_machine' ) ) {
-        $plugin_version = '1.0.0';
+        $plugin_version = '1.0.2';
+
+        // Pass data to the script, like the plugin's base URL for assets.
+        $script_data = array(
+            'pluginUrl' => plugin_dir_url( __FILE__ ),
+        );
+        wp_localize_script( 'zodiac-slot-machine-react-app', 'zodiacPluginData', $script_data );
 
         // Correct paths to the compiled files in the build directory.
         $react_app_js = plugin_dir_url( __FILE__ ) . 'build/main.js';

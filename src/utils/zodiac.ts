@@ -1,5 +1,7 @@
+declare const zodiacPluginData: { pluginUrl: string; };
+
 export const getWesternImagePath = (sign: string, gender: string | null | undefined): string => {
-  const basePath = 'images/western-zodiac/';
+  const basePath = `${zodiacPluginData.pluginUrl}public/images/western-zodiac/`;
   const signLower = sign.toLowerCase();
   
   if (gender === 'male') {
@@ -9,11 +11,11 @@ export const getWesternImagePath = (sign: string, gender: string | null | undefi
 };
 
 export const getChineseImagePath = (sign: string): string => {
-  return `images/chinese-zodiac/${sign.toLowerCase()}.png`;
+  return `${zodiacPluginData.pluginUrl}public/images/chinese-zodiac/${sign.toLowerCase()}.png`;
 };
 
 export const getNumerologyImagePath = (number: string): string => {
-  return `images/numerology/${number}.png`;
+  return `${zodiacPluginData.pluginUrl}public/images/numerology/${number}.png`;
 };
 
 export const calculateWesternZodiac = (month: number, day: number): string => {

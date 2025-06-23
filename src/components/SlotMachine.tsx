@@ -4,6 +4,8 @@ import { SlotItem, ResultsType } from '../types/zodiac';
 import * as zodiacData from '../data/zodiac';
 import { calculateWesternZodiac, calculateChineseZodiac, calculateNumerology, getWesternImagePath, getChineseImagePath, getNumerologyImagePath } from '../utils/zodiac';
 
+declare const zodiacPluginData: { pluginUrl: string; };
+
 export interface SlotMachineProps {
   birthdate: Date;
   gender: string; // Added gender prop
@@ -165,7 +167,7 @@ export const SlotMachine: FC<SlotMachineProps> = ({
   // Effect for component mount (audio init, image preloading) and unmount (cleanup)
   useEffect(() => {
     // Initialize audio
-    audioRef.current = new Audio('sounds/spin.mp3');
+    audioRef.current = new Audio(`${zodiacPluginData.pluginUrl}build/sounds/spin.mp3`);
     audioRef.current.loop = true;
 
     // Preload all images
